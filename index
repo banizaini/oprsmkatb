@@ -1,0 +1,38 @@
+Act as an expert Front-End Web Developer. I need you to build a responsive, single-page web application to generate a "One Page Report (OPR)" for school co-curricular activities.
+
+The project should be ready to be hosted on GitHub Pages (static HTML, CSS, JS).
+
+**Core Functionality:**
+1.  **Input Form:** A clean interface for teachers to input the following details:
+    * Tajuk Program (Program Title)
+    * Tarikh (Date)
+    * Masa (Time)
+    * Tempat (Venue)
+    * Sasaran (Target Audience)
+    * Objektif Program (Objectives - Textarea)
+    * Aktiviti Program (Activities - Textarea)
+    * Impak Program (Impact - Textarea)
+    * Cadangan Penambahbaikan (Suggestions - Textarea)
+    * Anjuran (Organizer)
+2.  **Image Upload:** Allow users to upload exactly 3 images. These images should be previewed in the layout.
+3.  **PDF Generation:** A button "Jana PDF & Muat Turun" that converts the report layout into an A4 PDF file using client-side libraries (like html2canvas and jspdf).
+
+**Design & Branding Requirements:**
+1.  **Header:**
+    * Must include the school logo on the left (assume filename is 'logo.jpg').
+    * School Name: "SMKA TOK BACHOK".
+    * Slogan: Must prominently display "Tok Bachok Memang Best" in the header design.
+2.  **Layout:**
+    * The generated report part must look like a formal A4 document.
+    * Use a table or grid layout to organize the text fields clearly.
+    * The 3 images should be arranged neatly at the bottom or side of the report.
+3.  **Styling:** Use Tailwind CSS via CDN for rapid, modern styling. The color scheme should match the provided logo (red, blue, yellow, black).
+
+**Technical Stack:**
+* HTML5
+* Tailwind CSS (CDN)
+* Vanilla JavaScript
+* Libraries: `jspdf` and `html2canvas` (include via CDN links).
+
+**Output:**
+Provide the complete `index.html` code containing the CSS, JS, and HTML structure. Ensure the code handles the image file reading (FileReader API) so the uploaded images appear in the PDF without needing a server.
