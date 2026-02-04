@@ -1,38 +1,324 @@
-Act as an expert Front-End Web Developer. I need you to build a responsive, single-page web application to generate a "One Page Report (OPR)" for school co-curricular activities.
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPR Generator - SMKA Tok Bachok</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-The project should be ready to be hosted on GitHub Pages (static HTML, CSS, JS).
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        smkaBlue: '#003399', // Adjust based on logo blue
+                        smkaRed: '#cc0000',  // Adjust based on logo red
+                        smkaYellow: '#ffcc00', // Adjust based on logo yellow
+                    }
+                }
+            }
+        }
+    </script>
 
-**Core Functionality:**
-1.  **Input Form:** A clean interface for teachers to input the following details:
-    * Tajuk Program (Program Title)
-    * Tarikh (Date)
-    * Masa (Time)
-    * Tempat (Venue)
-    * Sasaran (Target Audience)
-    * Objektif Program (Objectives - Textarea)
-    * Aktiviti Program (Activities - Textarea)
-    * Impak Program (Impact - Textarea)
-    * Cadangan Penambahbaikan (Suggestions - Textarea)
-    * Anjuran (Organizer)
-2.  **Image Upload:** Allow users to upload exactly 3 images. These images should be previewed in the layout.
-3.  **PDF Generation:** A button "Jana PDF & Muat Turun" that converts the report layout into an A4 PDF file using client-side libraries (like html2canvas and jspdf).
+    <style>
+        /* A4 Paper Dimensions for Preview */
+        .a4-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 15mm;
+            margin: 0 auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
 
-**Design & Branding Requirements:**
-1.  **Header:**
-    * Must include the school logo on the left (assume filename is 'logo.jpg').
-    * School Name: "SMKA TOK BACHOK".
-    * Slogan: Must prominently display "Tok Bachok Memang Best" in the header design.
-2.  **Layout:**
-    * The generated report part must look like a formal A4 document.
-    * Use a table or grid layout to organize the text fields clearly.
-    * The 3 images should be arranged neatly at the bottom or side of the report.
-3.  **Styling:** Use Tailwind CSS via CDN for rapid, modern styling. The color scheme should match the provided logo (red, blue, yellow, black).
+        /* Hide Scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        /* Table Styling for Report */
+        .report-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            vertical-align: top;
+        }
+        .report-label {
+            font-weight: bold;
+            background-color: #f0f4f8;
+            width: 25%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
 
-**Technical Stack:**
-* HTML5
-* Tailwind CSS (CDN)
-* Vanilla JavaScript
-* Libraries: `jspdf` and `html2canvas` (include via CDN links).
+    <nav class="bg-smkaBlue text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Sistem OPR Kokurikulum</h1>
+            <span class="text-sm bg-smkaYellow text-black px-3 py-1 rounded-full font-bold">SMKA Tok Bachok</span>
+        </div>
+    </nav>
 
-**Output:**
-Provide the complete `index.html` code containing the CSS, JS, and HTML structure. Ensure the code handles the image file reading (FileReader API) so the uploaded images appear in the PDF without needing a server.
+    <div class="container mx-auto p-4 md:p-8 flex flex-col lg:flex-row gap-8">
+        
+        <div class="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-md h-fit">
+            <h2 class="text-2xl font-bold mb-4 text-smkaBlue border-b-2 border-smkaRed pb-2">Masukkan Maklumat</h2>
+            
+            <form id="oprForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tajuk Program</label>
+                    <input type="text" id="inputTajuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-smkaBlue focus:border-smkaBlue" placeholder="Contoh: Kejohanan Merentas Desa">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tarikh</label>
+                        <input type="date" id="inputTarikh" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Masa</label>
+                        <input type="text" id="inputMasa" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="8:00 Pagi - 12:00 Tgh">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tempat</label>
+                    <input type="text" id="inputTempat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Dewan Besar SMKATB">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Anjuran</label>
+                    <input type="text" id="inputAnjuran" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Unit Kokurikulum">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Sasaran</label>
+                    <input type="text" id="inputSasaran" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Semua Pelajar Tingkatan 1">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Objektif Program</label>
+                    <textarea id="inputObjektif" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Senaraikan objektif..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Aktiviti Program</label>
+                    <textarea id="inputAktiviti" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ringkasan aktiviti..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Impak Program</label>
+                    <textarea id="inputImpak" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Kesan kepada pelajar..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Cadangan Penambahbaikan</label>
+                    <textarea id="inputCadangan" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Cadangan masa hadapan..."></textarea>
+                </div>
+
+                <div class="border-t pt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Muat Naik 3 Gambar</label>
+                    <input type="file" id="img1" accept="image/*" class="block w-full text-sm text-gray-500 mb-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-smkaBlue file:text-white hover:file:bg-blue-700"/>
+                    <input type="file" id="img2" accept="image/*" class="block w-full text-sm text-gray-500 mb-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-smkaBlue file:text-white hover:file:bg-blue-700"/>
+                    <input type="file" id="img3" accept="image/*" class="block w-full text-sm text-gray-500 mb-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-smkaBlue file:text-white hover:file:bg-blue-700"/>
+                </div>
+            </form>
+
+            <button onclick="generatePDF()" class="w-full mt-6 bg-smkaRed hover:bg-red-800 text-white font-bold py-3 px-4 rounded shadow-lg flex justify-center items-center gap-2 transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Jana PDF & Muat Turun
+            </button>
+        </div>
+
+        <div class="w-full lg:w-2/3 flex justify-center bg-gray-500 p-4 rounded overflow-auto">
+            
+            <div id="reportContent" class="a4-paper relative text-black leading-tight">
+                
+                <div class="flex items-center border-b-4 border-smkaBlue pb-4 mb-4">
+                    <div class="w-1/6 flex justify-center">
+                        <img src="logo.jpg" alt="Logo Sekolah" class="h-24 w-auto object-contain" onerror="this.src='https://placehold.co/100x100?text=LOGO'"> 
+                    </div>
+                    <div class="w-5/6 text-center">
+                        <h2 class="text-2xl font-bold uppercase tracking-wide text-smkaBlue">SMKA TOK BACHOK</h2>
+                        <p class="text-sm">Tangok, 16310 Bachok, Kelantan</p>
+                        <h1 class="text-3xl font-extrabold text-smkaRed mt-1 italic font-serif">"TOK BACHOK MEMANG BEST"</h1>
+                        <h3 class="text-xl font-bold mt-2 bg-smkaYellow inline-block px-4 py-1 rounded">LAPORAN ONE PAGE REPORT (OPR)</h3>
+                    </div>
+                </div>
+
+                <table class="w-full border-collapse report-table text-sm">
+                    <tr>
+                        <td class="report-label">TAJUK PROGRAM</td>
+                        <td colspan="3" class="font-bold text-lg uppercase" id="outTajuk">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">TARIKH</td>
+                        <td id="outTarikh">-</td>
+                        <td class="report-label w-1/6">MASA</td>
+                        <td id="outMasa">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">TEMPAT</td>
+                        <td colspan="3" id="outTempat">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">ANJURAN</td>
+                        <td colspan="3" id="outAnjuran">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">SASARAN</td>
+                        <td colspan="3" id="outSasaran">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">OBJEKTIF PROGRAM</td>
+                        <td colspan="3" class="whitespace-pre-wrap" id="outObjektif">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">AKTIVITI PROGRAM</td>
+                        <td colspan="3" class="whitespace-pre-wrap" id="outAktiviti">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">IMPAK PROGRAM</td>
+                        <td colspan="3" class="whitespace-pre-wrap" id="outImpak">-</td>
+                    </tr>
+                    <tr>
+                        <td class="report-label">CADANGAN PENAMBAHBAIKAN</td>
+                        <td colspan="3" class="whitespace-pre-wrap" id="outCadangan">-</td>
+                    </tr>
+                </table>
+
+                <div class="mt-4">
+                    <h4 class="font-bold text-smkaBlue border-b border-gray-400 mb-2">Laporan Bergambar</h4>
+                    <div class="grid grid-cols-3 gap-4 h-48">
+                        <div class="border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden h-full rounded bg-gray-50">
+                            <img id="outImg1" src="" class="w-full h-full object-cover hidden">
+                            <span class="text-gray-400 text-xs text-center p-2 placeholder-text">Gambar 1</span>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden h-full rounded bg-gray-50">
+                            <img id="outImg2" src="" class="w-full h-full object-cover hidden">
+                            <span class="text-gray-400 text-xs text-center p-2 placeholder-text">Gambar 2</span>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden h-full rounded bg-gray-50">
+                            <img id="outImg3" src="" class="w-full h-full object-cover hidden">
+                            <span class="text-gray-400 text-xs text-center p-2 placeholder-text">Gambar 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between text-sm">
+                    <div class="text-center w-1/3">
+                        <p class="mb-8">Disediakan Oleh:</p>
+                        <p class="border-t border-black pt-1 font-bold">Setiausaha Program</p>
+                    </div>
+                    <div class="text-center w-1/3">
+                        <p class="mb-8">Disahkan Oleh:</p>
+                        <p class="border-t border-black pt-1 font-bold">PK Kokurikulum</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Real-time Input Sync ---
+        const mapInputToOutput = (inputId, outputId) => {
+            const input = document.getElementById(inputId);
+            const output = document.getElementById(outputId);
+            input.addEventListener('input', () => {
+                output.innerText = input.value || '-';
+            });
+        };
+
+        // Map all text fields
+        mapInputToOutput('inputTajuk', 'outTajuk');
+        mapInputToOutput('inputTarikh', 'outTarikh');
+        mapInputToOutput('inputMasa', 'outMasa');
+        mapInputToOutput('inputTempat', 'outTempat');
+        mapInputToOutput('inputSasaran', 'outSasaran');
+        mapInputToOutput('inputObjektif', 'outObjektif');
+        mapInputToOutput('inputAktiviti', 'outAktiviti');
+        mapInputToOutput('inputImpak', 'outImpak');
+        mapInputToOutput('inputCadangan', 'outCadangan');
+        mapInputToOutput('inputAnjuran', 'outAnjuran');
+
+        // --- 2. Image Upload Handling ---
+        const handleImageUpload = (inputId, imgId) => {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imgElement = document.getElementById(imgId);
+                        imgElement.src = event.target.result;
+                        imgElement.classList.remove('hidden');
+                        imgElement.nextElementSibling.style.display = 'none'; // Hide placeholder text
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        };
+
+        handleImageUpload('img1', 'outImg1');
+        handleImageUpload('img2', 'outImg2');
+        handleImageUpload('img3', 'outImg3');
+
+        // --- 3. PDF Generation Logic ---
+        window.jsPDF = window.jspdf.jsPDF;
+
+        async function generatePDF() {
+            const element = document.getElementById('reportContent');
+            const btn = document.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            // Feedback to user
+            btn.innerHTML = 'Sedang Menjana...';
+            btn.disabled = true;
+
+            try {
+                // Generate Canvas from HTML
+                const canvas = await html2canvas(element, {
+                    scale: 2, // Higher scale for better quality
+                    useCORS: true, // Handle images safely
+                    scrollY: -window.scrollY // Fix scrolling offset issues
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                
+                // Initialize PDF (A4 size, Portrait)
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                // Add image to PDF
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                
+                // Get filename based on title or default
+                const filename = document.getElementById('inputTajuk').value || 'Laporan_OPR';
+                pdf.save(`${filename}.pdf`);
+
+            } catch (error) {
+                console.error("Error generating PDF:", error);
+                alert("Ralat semasa menjana PDF. Sila cuba lagi.");
+            } finally {
+                // Reset button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
