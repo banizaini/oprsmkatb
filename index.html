@@ -71,8 +71,8 @@
             display: flex; flex-direction: column;
         }
 
-        /* Header */
-        .pdf-header { text-align: center; margin-bottom: 10px; }
+        /* Header Sekolah */
+        .pdf-header { text-align: center; margin-bottom: 5px; }
         .logo { height: 80px; width: auto; margin-bottom: 5px; display: block; margin: 0 auto; }
         
         .school-name { 
@@ -80,8 +80,20 @@
             margin: 5px 0; font-family: Arial, sans-serif;
         }
         .yellow-bar {
-            width: 80%; height: 15px; background: #FFD700; 
-            margin: 5px auto 15px auto; border-radius: 8px;
+            width: 80%; height: 10px; background: #FFD700; 
+            margin: 5px auto 5px auto; border-radius: 8px;
+        }
+
+        /* --- TAMBAHAN BARU: TAJUK OPR --- */
+        .opr-headline {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #00008B;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: Arial, sans-serif;
         }
 
         /* Jadual Penuh */
@@ -94,9 +106,9 @@
 
         .content-table th, .content-table td {
             border: 1px solid #000;
-            padding: 8px 10px; /* Jarak teks dari garisan */
+            padding: 6px 10px; /* Jarak teks dari garisan */
             vertical-align: top;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .content-table th {
@@ -106,11 +118,11 @@
 
         /* Penggayaan Kotak Besar supaya sekata */
         .big-row {
-            height: 10%; /* Memaksa kotak menjadi tinggi */
+            height: 8%; /* Memaksa kotak menjadi tinggi tapi seimbang */
         }
 
         /* Bahagian Gambar */
-        .photo-section { margin-top: 15px; margin-bottom: 5px; }
+        .photo-section { margin-top: 10px; margin-bottom: 5px; }
         .photo-title { 
             font-weight: bold; color: #00008B; text-decoration: underline; 
             margin-bottom: 5px; font-size: 10pt; 
@@ -131,7 +143,7 @@
         .footer {
             text-align: center; color: red; font-weight: bold;
             font-style: italic; font-family: "Times New Roman", serif;
-            font-size: 12pt; margin-top: 10px; text-transform: uppercase;
+            font-size: 12pt; margin-top: 5px; text-transform: uppercase;
         }
         
         /* Loading */
@@ -219,6 +231,8 @@
                     <div class="yellow-bar"></div>
                 </div>
 
+                <div class="opr-headline">ONE PAGE REPORT (OPR)</div>
+
                 <table class="content-table">
                     <tr>
                         <th>TAJUK PROGRAM</th>
@@ -301,9 +315,16 @@
                 document.getElementById('out_' + id).innerText = document.getElementById(id).value;
             });
 
-            // Tarikh
-            const t = document.getElementById('tarikh').value;
-            document.getElementById('out_tarikh').innerText = t;
+            // Tarikh (Format ke BM)
+            const d = document.getElementById('tarikh').value;
+            if(d) {
+                const dateObj = new Date(d);
+                // Menukar format tarikh kepada "12 Februari 2024" (Contoh)
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                document.getElementById('out_tarikh').innerText = dateObj.toLocaleDateString('ms-MY', options);
+            } else {
+                document.getElementById('out_tarikh').innerText = "";
+            }
 
             // Masukkan Gambar
             const container = document.getElementById('photo-container');
@@ -314,7 +335,7 @@
                 if (gambarData[i]) {
                     div.innerHTML = `<img src="${gambarData[i]}">`;
                 } else {
-                    div.innerText = ""; // Kosong jika tiada gambar
+                    div.innerText = ""; 
                 }
                 container.appendChild(div);
             }
