@@ -3,245 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem OPR Pintar (Auto-Shrink)</title>
+    <title>Sistem OPR Stabil (Fixed Layout)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- CSS UNTUK INPUT BORANG (SKRIN) --- */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto 50px auto; background: white; padding: 30px; border-radius: 8px; border-top: 5px solid #00008B; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #00008B; text-transform: uppercase; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .upload-area { border: 2px dashed #00008B; padding: 20px; text-align: center; background: #f8fbff; border-radius: 4px; margin-bottom: 20px; }
-        button { background: #00008B; color: white; border: none; padding: 15px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s; }
+        /* --- CSS BORANG (PAPARAN SKRIN) --- */
+        body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; border-top: 5px solid #00008B; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #00008B; margin-bottom: 20px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background: #00008B; color: white; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
         button:hover { background: #000060; }
 
-        /* --- CSS UNTUK PDF (A4 TETAP) --- */
+        /* --- CSS PDF (A4 TETAP) --- */
         #pdf-template {
-            position: fixed; top: -9999px; left: -9999px; /* Sembunyi dari skrin */
-            width: 210mm; 
-            height: 296mm; /* A4 Tepat */
+            position: fixed; top: -9999px; left: -9999px;
+            width: 210mm; height: 297mm; /* A4 Size */
             background: white;
-            box-sizing: border-box;
-            /* Padding 0, kita kawal margin dalam frame */
         }
+
+        /* Frame Utama */
+        .page-container {
+            width: 100%; height: 100%;
+            position: relative; /* Penting untuk positioning */
+            padding: 10mm; /* Margin selamat */
+            box-sizing: border-box;
+        }
+
+        .border-blue {
+            width: 100%; height: 100%;
+            border: 3px solid #00008B;
+            padding: 3px; box-sizing: border-box;
+            position: relative;
+        }
+
+        .border-red {
+            width: 100%; height: 100%;
+            border: 2px solid #FF0000;
+            padding: 10px; box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Header */
+        .header { text-align: center; margin-bottom: 5px; height: 110px; }
+        .logo { height: 60px; margin-bottom: 2px; }
+        .school-name { font-size: 14pt; font-weight: 900; color: #00008B; margin: 0; font-family: Arial, sans-serif; }
+        .yellow-bar { width: 100%; height: 8px; background: #FFD700; margin: 5px 0; border-radius: 4px; }
+        .opr-title { font-size: 12pt; font-weight: bold; color: #00008B; text-align: center; border-bottom: 1px solid #ccc; margin-bottom: 5px; padding-bottom: 2px; }
+
+        /* Jadual Tetap */
+        table { width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed; }
+        th, td { border: 1px solid #000; padding: 4px; vertical-align: top; overflow: hidden; }
+        th { background: #e6f2ff; color: #00008B; width: 18%; }
         
-        .page-frame {
-            width: 100%; height: 100%;
-            padding: 5mm; /* Margin pencetak selamat */
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Tinggi Baris TETAP (PENTING) */
+        .row-short { height: 22px; }
+        .row-tall { height: 60px; } /* Tinggi tetap untuk kotak besar */
 
-        .outer-border {
-            width: 100%; height: 100%;
-            border: 3px solid #00008B; /* Biru Gelap */
-            padding: 3px;
-            box-sizing: border-box;
-            display: flex; flex-direction: column;
-        }
-
-        .inner-border {
-            width: 100%; height: 100%;
-            border: 2px solid #FF0000; /* Merah */
-            padding: 10px 20px;
-            box-sizing: border-box;
-            display: flex; flex-direction: column;
-            justify-content: space-between; /* Pastikan atas dan bawah terpisah */
-        }
-
-        /* BAHAGIAN ATAS (Header) */
-        .header-section {
-            text-align: center;
-            height: 120px; /* Tinggi tetap header */
-            flex-shrink: 0;
-        }
-        .logo { height: 65px; width: auto; display: block; margin: 0 auto 3px auto; }
-        .school-name { font-size: 16pt; font-weight: 900; color: #00008B; font-family: Arial, sans-serif; line-height: 1.1; }
-        .yellow-bar { width: 90%; height: 8px; background: #FFD700; margin: 3px auto 5px auto; border-radius: 5px; }
-        .opr-headline { font-size: 13pt; font-weight: bold; color: #00008B; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 2px; }
-
-        /* BAHAGIAN TENGAH (Jadual) */
-        .table-container {
-            flex-grow: 1; /* Isi ruang tengah */
-            display: flex;
-            align-items: center; /* Center vertical */
-            margin: 5px 0;
-            overflow: hidden;
-        }
-
-        table.main-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10pt;
-            table-layout: fixed; /* PENTING: Supaya lebar tak lari */
-            height: 100%; /* Paksa jadual ikut tinggi container */
-        }
-
-        .main-table th, .main-table td {
-            border: 1px solid #000;
-            padding: 4px 6px;
-            vertical-align: middle; /* Teks duduk tengah-tengah kotak */
-        }
-
-        .main-table th {
-            width: 18%; background: #e6f2ff;
-            color: #00008B; font-weight: bold; text-align: left;
-            font-size: 9pt;
-        }
-
-        /* Cell Kandungan */
-        .content-cell {
-            vertical-align: top;
-            overflow: hidden; /* Potong jika terkeluar (backup) */
+        td.content {
+            font-size: 9pt; 
             line-height: 1.2;
+            white-space: pre-wrap; /* Kekalkan enter */
         }
-        
-        /* Tinggi baris spesifik untuk memastikan muat satu page */
-        .row-standard { height: 25px; }
-        .row-large { height: 75px; } /* Tinggi tetap untuk kotak besar */
 
-        /* BAHAGIAN BAWAH (Gambar & Footer) */
+        /* Bahagian Bawah (Absolute Positioning) */
         .bottom-section {
-            height: 180px; /* Tinggi tetap bahagian bawah */
-            flex-shrink: 0;
-            margin-top: 5px;
+            position: absolute; 
+            bottom: 15px; 
+            left: 15px; 
+            right: 15px;
+            height: 160px; /* Ruang khas untuk gambar */
         }
 
-        .photo-title { font-weight: bold; color: #00008B; text-decoration: underline; margin-bottom: 5px; font-size: 9pt; }
-        .photo-grid { display: flex; justify-content: space-between; gap: 5px; height: 130px; }
-        .photo-box {
-            width: 32%; height: 100%;
-            border: 1px solid #999; background: #eee;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
+        .photo-label { font-weight: bold; color: #00008B; text-decoration: underline; font-size: 9pt; margin-bottom: 5px; }
+        .photos { display: flex; justify-content: space-between; gap: 5px; height: 120px; }
+        .photo-box { width: 32%; height: 100%; background: #eee; border: 1px solid #999; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .photo-box img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .footer-slogan {
-            text-align: center; color: red; font-weight: bold; font-style: italic;
-            font-family: "Times New Roman", serif; font-size: 11pt; margin-top: 8px;
-            text-transform: uppercase;
-        }
+        .footer { text-align: center; color: red; font-weight: bold; font-style: italic; font-size: 10pt; margin-top: 5px; font-family: "Times New Roman", serif; }
 
-        /* Loader */
-        #loader {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(255,255,255,0.95); z-index: 9999;
-            align-items: center; justify-content: center; flex-direction: column;
-        }
+        #loader { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 9999; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <h3 style="color:#00008B;">Sedang Menyusun Atur & Mengecilkan Teks...</h3>
-        <p>Sila tunggu sebentar.</p>
-    </div>
+    <div id="loader"><h3 style="color:#00008B;">Menjana PDF...</h3></div>
 
     <div class="container">
-        <h2>Penjana Laporan OPR (Auto-Fit)</h2>
-        <p style="text-align:center; color:#666; font-size:0.9em;">Teks panjang akan dikecilkan secara automatik supaya muat 1 page.</p>
-
+        <h2>Isi Laporan OPR (Versi Stabil)</h2>
+        <p style="text-align:center; color:#666; font-size:0.8em;">Isi ringkas sahaja. Teks berlebihan akan dipotong automatik.</p>
+        
         <form id="oprForm">
-            <div class="form-group">
-                <label>Tajuk Program</label>
-                <input type="text" id="tajuk" placeholder="CONTOH: PROGRAM JIWA MADANI">
-            </div>
-
+            <div class="form-group"><label>Tajuk Program</label><input type="text" id="tajuk"></div>
             <div class="row-2">
                 <div class="form-group"><label>Tarikh</label><input type="date" id="tarikh"></div>
-                <div class="form-group"><label>Masa</label><input type="text" id="masa" placeholder="8:00 PG - 12:30 TGH"></div>
+                <div class="form-group"><label>Masa</label><input type="text" id="masa"></div>
             </div>
+            <div class="form-group"><label>Tempat</label><input type="text" id="tempat"></div>
+            <div class="form-group"><label>Sasaran</label><input type="text" id="sasaran"></div>
+            
+            <div class="form-group"><label>Objektif</label><textarea id="objektif" rows="3"></textarea></div>
+            <div class="form-group"><label>Aktiviti</label><textarea id="aktiviti" rows="3"></textarea></div>
+            <div class="form-group"><label>Impak</label><textarea id="impak" rows="3"></textarea></div>
+            <div class="form-group"><label>Penambahbaikan</label><textarea id="penambahbaikan" rows="3"></textarea></div>
+            <div class="form-group"><label>Anjuran</label><input type="text" id="anjuran"></div>
 
-            <div class="form-group"><label>Tempat</label><input type="text" id="tempat" placeholder="Dewan Sekolah"></div>
-            <div class="form-group"><label>Sasaran</label><input type="text" id="sasaran" placeholder="Semua Guru & Pelajar"></div>
-
-            <div class="form-group"><label>Objektif</label><textarea id="objektif" rows="4" placeholder="Masukkan objektif..."></textarea></div>
-            <div class="form-group"><label>Aktiviti</label><textarea id="aktiviti" rows="4" placeholder="Senarai aktiviti..."></textarea></div>
-            <div class="form-group"><label>Impak</label><textarea id="impak" rows="3" placeholder="Impak program..."></textarea></div>
-            <div class="form-group"><label>Penambahbaikan</label><textarea id="penambahbaikan" rows="3" placeholder="Cadangan..."></textarea></div>
-            <div class="form-group"><label>Anjuran</label><input type="text" id="anjuran" placeholder="Unit HEM"></div>
-
-            <div class="upload-area">
-                <label>Muat Naik 3 Gambar (Wajib)</label><br>
+            <div class="form-group" style="border: 2px dashed #00008B; padding:10px; text-align:center; background:#f0f8ff;">
+                <label>Muat Naik 3 Gambar</label>
                 <input type="file" id="photoInput" multiple accept="image/*" onchange="previewPhotos(this)">
-                <p id="fileCount" style="font-size:12px; color:#666;">Tiada gambar dipilih</p>
+                <p id="fileMsg" style="margin:5px 0; font-size:12px; color:#555;">0 fail dipilih</p>
             </div>
 
-            <button type="button" onclick="prepareAndPrint()">JANA PDF & DOWNLOAD</button>
+            <button type="button" onclick="generatePDF()">JANA PDF</button>
         </form>
     </div>
 
     <div id="pdf-template">
-        <div class="page-frame">
-            <div class="outer-border">
-                <div class="inner-border">
+        <div class="page-container">
+            <div class="border-blue">
+                <div class="border-red">
                     
-                    <div class="header-section">
-                        <img src="2.jpg" class="logo" alt="Logo" onerror="this.style.display='none'">
+                    <div class="header">
+                        <img src="2.jpg" class="logo" onerror="this.style.display='none'">
                         <div class="school-name">SMK AGAMA TOK BACHOK</div>
                         <div style="font-size:9pt;">Tangok, 16310 Bachok, Kelantan</div>
                         <div class="yellow-bar"></div>
-                        <div class="opr-headline">ONE PAGE REPORT (OPR)</div>
+                        <div class="opr-title">ONE PAGE REPORT (OPR)</div>
                     </div>
 
-                    <div class="table-container">
-                        <table class="main-table">
-                            <tr class="row-standard">
-                                <th>TAJUK PROGRAM</th>
-                                <td colspan="3" id="out_tajuk" style="font-weight:bold; text-transform:uppercase;"></td>
-                            </tr>
-                            <tr class="row-standard">
-                                <th>TARIKH</th>
-                                <td id="out_tarikh"></td>
-                                <th style="width:10%; text-align:center;">MASA</th>
-                                <td id="out_masa" style="width:20%;"></td>
-                            </tr>
-                            <tr class="row-standard">
-                                <th>TEMPAT</th>
-                                <td colspan="3" id="out_tempat"></td>
-                            </tr>
-                            <tr class="row-standard">
-                                <th>SASARAN</th>
-                                <td colspan="3" id="out_sasaran"></td>
-                            </tr>
-                            
-                            <tr class="row-large">
-                                <th>OBJEKTIF</th>
-                                <td colspan="3" id="out_objektif" class="content-cell auto-resize"></td>
-                            </tr>
-                            <tr class="row-large">
-                                <th>AKTIVITI</th>
-                                <td colspan="3" id="out_aktiviti" class="content-cell auto-resize"></td>
-                            </tr>
-                            <tr class="row-large">
-                                <th>IMPAK</th>
-                                <td colspan="3" id="out_impak" class="content-cell auto-resize"></td>
-                            </tr>
-                            <tr class="row-large">
-                                <th>PENAMBAHBAIKAN</th>
-                                <td colspan="3" id="out_penambahbaikan" class="content-cell auto-resize"></td>
-                            </tr>
-                            
-                            <tr class="row-standard">
-                                <th>ANJURAN</th>
-                                <td colspan="3" id="out_anjuran"></td>
-                            </tr>
-                        </table>
-                    </div>
+                    <table>
+                        <tr class="row-short">
+                            <th>TAJUK PROGRAM</th>
+                            <td colspan="3" id="out_tajuk" style="font-weight:bold; text-transform:uppercase;"></td>
+                        </tr>
+                        <tr class="row-short">
+                            <th>TARIKH</th>
+                            <td id="out_tarikh"></td>
+                            <th style="width:10%; text-align:center;">MASA</th>
+                            <td id="out_masa" style="width:20%;"></td>
+                        </tr>
+                        <tr class="row-short">
+                            <th>TEMPAT</th>
+                            <td colspan="3" id="out_tempat"></td>
+                        </tr>
+                        <tr class="row-short">
+                            <th>SASARAN</th>
+                            <td colspan="3" id="out_sasaran"></td>
+                        </tr>
+                        
+                        <tr class="row-tall">
+                            <th>OBJEKTIF</th>
+                            <td colspan="3" id="out_objektif" class="content"></td>
+                        </tr>
+                        <tr class="row-tall">
+                            <th>AKTIVITI</th>
+                            <td colspan="3" id="out_aktiviti" class="content"></td>
+                        </tr>
+                        <tr class="row-tall">
+                            <th>IMPAK</th>
+                            <td colspan="3" id="out_impak" class="content"></td>
+                        </tr>
+                        <tr class="row-tall">
+                            <th>PENAMBAHBAIKAN</th>
+                            <td colspan="3" id="out_penambahbaikan" class="content"></td>
+                        </tr>
+                        <tr class="row-short">
+                            <th>ANJURAN</th>
+                            <td colspan="3" id="out_anjuran"></td>
+                        </tr>
+                    </table>
 
                     <div class="bottom-section">
-                        <div class="photo-title">GAMBAR AKTIVITI</div>
-                        <div class="photo-grid" id="out_photos">
+                        <div class="photo-label">GAMBAR AKTIVITI</div>
+                        <div class="photos" id="out_photos">
                             <div class="photo-box">TIADA</div>
                             <div class="photo-box">TIADA</div>
                             <div class="photo-box">TIADA</div>
                         </div>
-                        <div class="footer-slogan">"TOK BACHOK MEMANG BEST"</div>
+                        <div class="footer">"TOK BACHOK MEMANG BEST"</div>
                     </div>
 
                 </div>
@@ -255,9 +195,8 @@
         function previewPhotos(input) {
             photoData = [];
             const files = Array.from(input.files);
-            if(files.length > 3) { alert("Maksimum 3 gambar sahaja!"); return; }
-            document.getElementById('fileCount').innerText = files.length + " gambar dipilih";
-
+            if(files.length > 3) { alert("Maksimum 3 gambar!"); return; }
+            document.getElementById('fileMsg').innerText = files.length + " gambar dipilih";
             files.forEach(f => {
                 const r = new FileReader();
                 r.onload = (e) => photoData.push(e.target.result);
@@ -265,39 +204,12 @@
             });
         }
 
-        // FUNGSI UTAMA: Kecilkan Font Sampai Muat
-        function autoShrinkText() {
-            const cells = document.querySelectorAll('.auto-resize');
-            
-            cells.forEach(cell => {
-                let fontSize = 11; // Mula dengan saiz asal (pt)
-                cell.style.fontSize = fontSize + 'pt';
-                cell.style.lineHeight = '1.3';
-
-                // Loop: Selagi teks melimpah (scrollHeight > clientHeight), kecilkan font
-                // Had minima font ialah 6pt supaya masih boleh dibaca
-                while ( (cell.scrollHeight > cell.clientHeight) && (fontSize > 6) ) {
-                    fontSize -= 0.5; // Kurangkan 0.5pt setiap langkah
-                    cell.style.fontSize = fontSize + 'pt';
-                    // Ketatkan sedikit jarak baris jika font kecil
-                    if(fontSize < 9) cell.style.lineHeight = '1.1';
-                }
-            });
-        }
-
-        function prepareAndPrint() {
+        function generatePDF() {
             document.getElementById('loader').style.display = 'flex';
 
-            // 1. Pindahkan Data
-            const map = ['tajuk', 'masa', 'tempat', 'sasaran', 'anjuran'];
-            map.forEach(k => document.getElementById('out_'+k).innerText = document.getElementById(k).value);
-
-            // Textarea perlu preserve new line, tapi untuk auto-shrink kita guna innerText dulu
-            // Gunakan style 'white-space: pre-wrap' dalam CSS inline jika perlu, 
-            // tapi untuk pengiraan height tepat, text biasa lebih selamat.
-            ['objektif', 'aktiviti', 'impak', 'penambahbaikan'].forEach(k => {
-                document.getElementById('out_'+k).innerText = document.getElementById(k).value;
-            });
+            // Pindahkan Data
+            const fields = ['tajuk', 'masa', 'tempat', 'sasaran', 'objektif', 'aktiviti', 'impak', 'penambahbaikan', 'anjuran'];
+            fields.forEach(id => document.getElementById('out_'+id).innerText = document.getElementById(id).value);
 
             // Tarikh
             const d = document.getElementById('tarikh').value;
@@ -305,44 +217,37 @@
                 const dateObj = new Date(d);
                 const opt = { day: 'numeric', month: 'long', year: 'numeric' };
                 document.getElementById('out_tarikh').innerText = dateObj.toLocaleDateString('ms-MY', opt);
-            } else {
-                document.getElementById('out_tarikh').innerText = "";
             }
 
             // Gambar
-            const grid = document.getElementById('out_photos');
-            grid.innerHTML = "";
+            const container = document.getElementById('out_photos');
+            container.innerHTML = '';
             for(let i=0; i<3; i++){
                 const div = document.createElement('div');
                 div.className = 'photo-box';
                 if(photoData[i]) div.innerHTML = `<img src="${photoData[i]}">`;
-                else div.innerText = "TIADA";
-                grid.appendChild(div);
+                container.appendChild(div);
             }
 
-            // 2. Paparkan Template untuk Proses Pengecilan
+            // PDF Config
             const element = document.getElementById('pdf-template');
-            element.style.position = 'static'; 
+            element.style.position = 'static';
             element.style.display = 'block';
 
-            // 3. JALANKAN PROSES PENGECILAN FONT (Tunggu sekejap untuk render)
+            const opt = {
+                margin: 0,
+                filename: 'Laporan_OPR_Stabil.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
             setTimeout(() => {
-                autoShrinkText(); // <--- MAGIC BERLAKU DI SINI
-
-                // 4. Generate PDF selepas font disesuaikan
-                const opt = {
-                    margin: 0,
-                    filename: 'Laporan_OPR_AutoFit.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
                 html2pdf().set(opt).from(element).save().then(() => {
                     element.style.position = 'fixed';
                     document.getElementById('loader').style.display = 'none';
                 });
-            }, 500);
+            }, 800);
         }
     </script>
 </body>
