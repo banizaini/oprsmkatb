@@ -3,21 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem OPR V5 (Auto-Balance)</title>
+    <title>Sistem JANA OPR SMKATB</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- CSS SKRIN (BORANG) --- */
+        /* --- CSS SKRIN (BORANG INPUT) --- */
         body { font-family: Arial, sans-serif; background: #eef2f5; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; border-top: 5px solid #00008B; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #00008B; margin-bottom: 15px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { background: #00008B; color: white; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+        .container { 
+            max-width: 800px; margin: 0 auto; background: white; 
+            padding: 30px; border-radius: 8px; border-top: 5px solid #00008B; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        h2 { text-align: center; color: #00008B; margin-bottom: 10px; text-transform: uppercase; }
+        p.subtitle { text-align: center; color: #555; font-size: 0.9em; margin-bottom: 25px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #333; }
+        input, textarea { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; 
+            border-radius: 4px; box-sizing: border-box; font-size: 14px;
+        }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        /* Butang */
+        button { 
+            background: #00008B; color: white; border: none; padding: 15px; 
+            width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; 
+            border-radius: 4px; margin-top: 10px; transition: 0.3s;
+        }
         button:hover { background: #000060; }
 
-        /* --- CSS PDF (A4 FIX) --- */
+        /* --- CSS PDF (A4 FIX - JANGAN UBAH) --- */
         #pdf-template {
             position: fixed; top: -9999px; left: -9999px;
             width: 210mm; height: 296mm; /* A4 Tepat */
@@ -43,15 +58,14 @@
         .border-red {
             width: 100%; height: 100%;
             border: 2px solid #FF0000;
-            padding: 10px 15px; /* Kurangkan padding tepi */
+            padding: 10px 15px;
             box-sizing: border-box;
             display: flex; flex-direction: column; 
-            /* Flex Column = Susun Atas ke Bawah */
         }
 
         /* 2. Header (Saiz Tetap) */
         .header-section {
-            flex: 0 0 auto; /* Jangan kembang, jangan kecut */
+            flex: 0 0 auto;
             text-align: center;
             margin-bottom: 5px;
         }
@@ -59,7 +73,6 @@
         .school-name { font-size: 14pt; font-weight: 900; color: #00008B; margin: 0; font-family: Arial, sans-serif; }
         .yellow-bar { width: 100%; height: 6px; background: #FFD700; margin: 3px 0 8px 0; border-radius: 3px; }
         
-        /* FIX BERTINDIH: Tambah margin & padding */
         .opr-headline { 
             font-size: 12pt; font-weight: bold; color: #00008B; text-transform: uppercase; 
             border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; margin-top: 5px;
@@ -67,26 +80,21 @@
 
         /* 3. Jadual (Flexible - Isi Ruang Kosong) */
         .table-wrapper {
-            flex-grow: 1; /* PENTING: Ini akan tolak footer ke bawah & kembangkan jadual */
+            flex-grow: 1; /* PENTING: Kembangkan jadual */
             display: flex;
             flex-direction: column;
         }
 
         table { 
-            width: 100%; 
-            height: 100%; /* Jadual tarik tinggi penuh */
-            border-collapse: collapse; 
-            font-size: 9pt; 
-            table-layout: fixed; 
+            width: 100%; height: 100%;
+            border-collapse: collapse; font-size: 9pt; table-layout: fixed; 
         }
         
         th, td { border: 1px solid #000; padding: 5px; vertical-align: top; }
         th { background: #e6f2ff; color: #00008B; width: 18%; font-weight: bold; }
         
-        /* Pengawalan Baris */
         .row-short { height: 25px; } /* Baris info pendek */
         
-        /* Baris Isi Penting (Objektif dll) dibiar 'auto' atau % supaya seimbang */
         .content-cell {
             white-space: pre-wrap; 
             line-height: 1.2;
@@ -96,8 +104,8 @@
 
         /* 4. Footer & Gambar (Saiz Tetap di Bawah) */
         .footer-section {
-            flex: 0 0 auto; /* Jangan kembang */
-            height: 150px; /* Tinggi tetap bahagian gambar */
+            flex: 0 0 auto;
+            height: 150px;
             margin-top: 5px;
         }
 
@@ -121,18 +129,20 @@
 </head>
 <body>
 
-    <div id="loader"><h3 style="color:#00008B;">Menjana PDF...</h3></div>
+    <div id="loader"><h3 style="color:#00008B;">Sedang Menjana PDF...</h3></div>
 
     <div class="container">
-        <h2>OPR V5 (Auto-Balance)</h2>
-        <p style="text-align:center; font-size:0.8em; color:#555;">Masalah bertindih & ruang kosong telah diselesaikan.</p>
+        <h2>JANA ONE PAGE REPORT SMKATB</h2>
+        <p class="subtitle">Sila isi semua maklumat dan tekan butang JANA PDF apabila selesai</p>
 
         <form id="oprForm">
             <div class="form-group"><label>Tajuk Program</label><input type="text" id="tajuk" placeholder="CONTOH: HARI KOKURIKULUM"></div>
+            
             <div class="row-2">
                 <div class="form-group"><label>Tarikh</label><input type="date" id="tarikh"></div>
                 <div class="form-group"><label>Masa</label><input type="text" id="masa" placeholder="8:00 PG - 12:00 TGH"></div>
             </div>
+
             <div class="form-group"><label>Tempat</label><input type="text" id="tempat"></div>
             <div class="form-group"><label>Sasaran</label><input type="text" id="sasaran"></div>
             
@@ -142,10 +152,10 @@
             <div class="form-group"><label>Penambahbaikan</label><textarea id="penambahbaikan" rows="3"></textarea></div>
             <div class="form-group"><label>Anjuran</label><input type="text" id="anjuran"></div>
 
-            <div class="form-group" style="background:#f0f8ff; padding:10px; border:1px dashed #00008B; text-align:center;">
-                <label>Muat Naik 3 Gambar</label>
+            <div class="form-group" style="background:#f0f8ff; padding:15px; border:2px dashed #00008B; text-align:center; border-radius:4px;">
+                <label style="margin-bottom:10px;">Muat Naik 3 Gambar</label>
                 <input type="file" id="photoInput" multiple accept="image/*" onchange="previewPhotos(this)">
-                <p id="msgFile" style="font-size:11px; margin:5px 0;">0 gambar</p>
+                <p id="msgFile" style="font-size:12px; margin:5px 0; color:#666;">Tiada gambar dipilih</p>
             </div>
 
             <button type="button" onclick="generatePDF()">JANA PDF</button>
@@ -231,7 +241,7 @@
         function previewPhotos(input) {
             photoData = [];
             const files = Array.from(input.files);
-            if(files.length > 3) { alert("Maksimum 3 gambar!"); return; }
+            if(files.length > 3) { alert("Maksimum 3 gambar sahaja!"); return; }
             document.getElementById('msgFile').innerText = files.length + " gambar dipilih";
             files.forEach(f => {
                 const r = new FileReader();
@@ -248,12 +258,14 @@
                 document.getElementById('out_'+id).innerText = document.getElementById(id).value;
             });
 
+            // Format Tarikh
             const d = document.getElementById('tarikh').value;
             if(d) {
                 const dateObj = new Date(d);
                 document.getElementById('out_tarikh').innerText = dateObj.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
             }
 
+            // Masukkan Gambar
             const container = document.getElementById('out_photos');
             container.innerHTML = '';
             for(let i=0; i<3; i++){
@@ -263,13 +275,14 @@
                 container.appendChild(div);
             }
 
+            // Generate PDF
             const element = document.getElementById('pdf-template');
             element.style.position = 'static'; 
             element.style.display = 'block';
 
             const opt = {
                 margin: 0,
-                filename: 'Laporan_OPR_V5.pdf',
+                filename: 'Laporan_OPR_SMKATB.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
